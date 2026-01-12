@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Revisão dos detalhes do contrato">
+    <title>Revisão do Contrato - Tech Tower Coworking</title>
+    <link rel="stylesheet" href="styles_novo.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="text-center mb-5">
+            <h1>Revisão do Contrato</h1>
+            <p class="text-muted">Verifique todos os dados antes de finalizar</p>
+        </header>
+
+        <div id="contractDetails">
+            <section class="mb-4">
+                <h3 class="section-title">Informações do Contrato</h3>
+                <table class="table">
+                    <tbody id="contractInfo"></tbody>
+                </table>
+            </section>
+
+            <section class="mb-4">
+                <h3 class="section-title">Especificações do Contrato</h3>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Item</th>
+                                <th>Benefícios</th>
+                                <th>Valor Mensal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="specsTableBody"></tbody>
+                    </table>
+                </div>
+                <table class="table">
+                    <tbody id="contractValues"></tbody>
+                </table>
+            </section>
+
+            <section class="mb-4">
+                <h3 class="section-title">Dados da Empresa</h3>
+                <table class="table">
+                    <tbody id="companyDetails"></tbody>
+                </table>
+            </section>
+
+            <section class="mb-4">
+                <h3 class="section-title">Dados do Representante Legal</h3>
+                <table class="table">
+                    <tbody id="legalRepDetails"></tbody>
+                </table>
+            </section>
+
+            <section class="mb-4" id="adminSection" style="display: none;">
+                <h3 class="section-title">Administração da Sala</h3>
+                <table class="table">
+                    <tbody id="adminDetails"></tbody>
+                </table>
+            </section>
+
+            <section class="mb-4">
+                <h3 class="section-title">Informações Adicionais</h3>
+                <table class="table">
+                    <tbody id="additionalDetails"></tbody>
+                </table>
+            </section>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            <strong>Importante:</strong> Revise cuidadosamente todas as informações antes de gerar o PDF do contrato.
+        </div>
+
+        <div class="d-flex justify-content-between mt-4">
+            <button onclick="window.location.href='index.html'" class="btn btn-secondary">
+                Voltar e Editar
+            </button>
+            <div>
+                <button id="downloadPDF" class="btn btn-success btn-lg mr-2">
+                    Gerar PDF do Contrato
+                </button>
+                <button id="sendToZapSign" class="btn btn-primary btn-lg mr-2" title="Enviar para assinatura digital">
+                    <i class="fas fa-file-signature"></i> Enviar para ZapSign
+                </button>
+                <button id="createPayment" class="btn btn-info btn-lg" title="Gerar cobrança no Asaas">
+                    <i class="fas fa-dollar-sign"></i> Gerar Cobrança
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="zapsign-integration.js"></script>
+    <script src="asaas-integration.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script>
+        /**
+         * Sistema de Revisão de Contrato
+         * Exibição e geração de PDF dos dados contratuais
+         */
+
+        // Mapeamento de campos para labels legíveis
+        const FIELD_LABELS = {
+            companyName: 'Nome da Empresa',
+            companyDocument: 'CNPJ',
+            companyActivity: 'Atividade',
+            companyAddress: 'Endereço',
+            companyPhone: 'Telefone',
+            companyEmail: 'E-mail',
+            legalRepName: 'Nome Completo',
+            legalRepDocument: 'CPF',
+            legalRepRole: 'Cargo',
+            legalRepType: 'Tipo de Representante',
+            legalRepPhone: 'Telefone',
+            legalRepEmail: 'E-mail',
+            roomAdminAuthorized: 'Administração Autorizada',
+            roomAdminName: 'Nome do Administrador',
+            roomAdminDocument: 'CPF do Administrador',
+            acceptTerms: 'Aceitou os Termos',
+            submissionDate: 'Data de Submissão'
+        };
+
+        // Gerenciador de dados
+        const DataManager = {
+            loadFormData() {
+                try {
+                    const data = localStorage.getItem('formData');
+                    if (!data) {
+                        alert('Nenhum dado encontrado. Você será redirecionado para o formulário.');
+                        window.location.href = 'index_novo.html';
+                        return null;
+                    }
+                    return JSON.parse(data);
+                } catch (error) {
+                    console.error('Erro ao carregar dados:', error);
+                    alert('Erro ao carregar os dados. Tente novamente.');
+                    window.location.href = 'index_novo.html';
+                    return null;
+                }
+            }
+        };
+
+        // Gerenciador de UI
+        const UIManager = {
+            formatValue(key, value) {
+                if (typeof value === 'boolean') {
+                    return value ? 'Sim' : 'Não';
+                }
+                return value || 'Não informado';
+            },
+
+            createTableRow(label, value) {
+                return `
+                    <tr>
+                        <td><strong>${label}</strong></td>
+                        <td>${value}</td>
+                    </tr>
+                `;
+            },
+
+            populateContractInfo(data) {
+                const tbody = document.getElementById('contractInfo');
+                tbody.innerHTML = `
+                    ${this.createTableRow('Número do Contrato', this.formatValue('contractNumber', data.contractNumber))}
+                `;
+            },
+
+            populateContractSpecs(data) {
+                const tbody = document.getElementById('specsTableBody');
+                if (data.contractSpecs && data.contractSpecs.length > 0) {
+                    tbody.innerHTML = data.contractSpecs.map(spec => `
+                        <tr>
+                            <td class="text-center">${spec.item}</td>
+                            <td>${spec.benefit}</td>
+                            <td class="text-right">${spec.monthlyValue}</td>
+                        </tr>
+                    `).join('');
+                } else {
+                    tbody.innerHTML = '<tr><td colspan="3" class="text-center">Nenhuma especificação informada</td></tr>';
+                }
+
+                const valuesBody = document.getElementById('contractValues');
+                valuesBody.innerHTML = `
+                    ${this.createTableRow('Total dos Benefícios Ofertados', this.formatValue('totalBenefits', data.totalBenefits))}
+                    ${this.createTableRow('Desconto Concedido', this.formatValue('discountAmount', data.discountAmount))}
+                    ${this.createTableRow('Total com Desconto', this.formatValue('totalWithDiscount', data.totalWithDiscount))}
+                    ${this.createTableRow('Valor Mensal do Contrato', this.formatValue('monthlyContractValue', data.monthlyContractValue))}
+                    ${this.createTableRow('Descrição do Desconto', this.formatValue('discountDescription', data.discountDescription))}
+                `;
+            },
+
+            populateCompanyDetails(data) {
+                const tbody = document.getElementById('companyDetails');
+                tbody.innerHTML = `
+                    ${this.createTableRow(FIELD_LABELS.companyName, this.formatValue('companyName', data.companyName))}
+                    ${this.createTableRow(FIELD_LABELS.companyDocument, this.formatValue('companyDocument', data.companyDocument))}
+                    ${this.createTableRow(FIELD_LABELS.companyActivity, this.formatValue('companyActivity', data.companyActivity))}
+                    ${this.createTableRow(FIELD_LABELS.companyAddress, this.formatValue('companyAddress', data.companyAddress))}
+                    ${this.createTableRow(FIELD_LABELS.companyPhone, this.formatValue('companyPhone', data.companyPhone))}
+                    ${this.createTableRow(FIELD_LABELS.companyEmail, this.formatValue('companyEmail', data.companyEmail))}
+                `;
+            },
+
+            populateLegalRepDetails(data) {
+                const tbody = document.getElementById('legalRepDetails');
+                tbody.innerHTML = `
+                    ${this.createTableRow(FIELD_LABELS.legalRepName, this.formatValue('legalRepName', data.legalRepName))}
+                    ${this.createTableRow(FIELD_LABELS.legalRepDocument, this.formatValue('legalRepDocument', data.legalRepDocument))}
+                    ${this.createTableRow(FIELD_LABELS.legalRepRole, this.formatValue('legalRepRole', data.legalRepRole))}
+                    ${this.createTableRow(FIELD_LABELS.legalRepType, this.formatValue('legalRepType', data.legalRepType))}
+                    ${this.createTableRow(FIELD_LABELS.legalRepPhone, this.formatValue('legalRepPhone', data.legalRepPhone))}
+                    ${this.createTableRow(FIELD_LABELS.legalRepEmail, this.formatValue('legalRepEmail', data.legalRepEmail))}
+                `;
+            },
+
+            populateAdminDetails(data) {
+                if (data.roomAdminAuthorized) {
+                    document.getElementById('adminSection').style.display = 'block';
+                    const tbody = document.getElementById('adminDetails');
+                    tbody.innerHTML = `
+                        ${this.createTableRow(FIELD_LABELS.roomAdminAuthorized, 'Sim')}
+                        ${this.createTableRow(FIELD_LABELS.roomAdminName, this.formatValue('roomAdminName', data.roomAdminName))}
+                        ${this.createTableRow(FIELD_LABELS.roomAdminDocument, this.formatValue('roomAdminDocument', data.roomAdminDocument))}
+                    `;
+                }
+            },
+
+            populateAdditionalDetails(data) {
+                const tbody = document.getElementById('additionalDetails');
+                tbody.innerHTML = `
+                    ${this.createTableRow(FIELD_LABELS.acceptTerms, this.formatValue('acceptTerms', data.acceptTerms))}
+                    ${this.createTableRow(FIELD_LABELS.submissionDate, this.formatValue('submissionDate', data.submissionDate))}
+                `;
+            },
+
+            renderContractDetails(data) {
+                this.populateContractInfo(data);
+                this.populateContractSpecs(data);
+                this.populateCompanyDetails(data);
+                this.populateLegalRepDetails(data);
+                this.populateAdminDetails(data);
+                this.populateAdditionalDetails(data);
+            }
+        };
+
+        // Gerenciador de PDF
+        const PDFGenerator = {
+            async generatePDF(data) {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Configurações de margens e centralização
+                    const pageWidth = doc.internal.pageSize.width;
+                    const pageHeight = doc.internal.pageSize.height;
+                    const marginLeft = 15;
+                    const marginRight = 15;
+                    const contentWidth = pageWidth - marginLeft - marginRight;
+                    const boxPadding = 5;
+                    
+                    let y = 35;
+                    const lineHeight = 4;
+                    const marginBottom = 25;
+                    let currentPage = 1;
+
+                    // Função para desenhar cabeçalho em cada página
+                    const drawHeader = () => {
+                        const headerY = 10;
+                        
+                        // Logo (placeholder - círculo com iniciais)
+                        doc.setDrawColor(103, 126, 234);
+                        doc.setFillColor(103, 126, 234);
+                        doc.circle(20, headerY + 5, 8, 'F');
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('TT', 20, headerY + 7, { align: 'center' });
+                        
+                        // Texto do cabeçalho
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('TECH TOWER COWORKING', 35, headerY + 3);
+                        
+                        doc.setFontSize(6);
+                        doc.setFont(undefined, 'normal');
+                        doc.text('AV. DR. NELSON D\'AVILA, 389 - SALA 105A - SAO JOSE DOS CAMPOS/SP', 35, headerY + 7);
+                        doc.text('www.techtowercoworking.com.br - (12) 98198-0288', 35, headerY + 10);
+                        
+                        // Linha separadora
+                        doc.setDrawColor(150, 150, 150);
+                        doc.setLineWidth(0.3);
+                        doc.line(marginLeft, headerY + 15, pageWidth - marginRight, headerY + 15);
+                    };
+
+                    // Função para adicionar rodapé com numeração
+                    const drawFooter = (pageNum, totalPages) => {
+                        doc.setFontSize(7);
+                        doc.setFont(undefined, 'normal');
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`Página ${pageNum}/${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                    };
+
+                    // Função para adicionar nova página se necessário
+                    const checkPageBreak = (additionalSpace = 0) => {
+                        if (y + additionalSpace > pageHeight - marginBottom) {
+                            doc.addPage();
+                            currentPage++;
+                            drawHeader();
+                            y = 35;
+                        }
+                    };
+
+                    // Desenhar cabeçalho na primeira página
+                    drawHeader();
+
+                    // Número do Contrato
+                    if (data.contractNumber) {
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Contrato No: ${data.contractNumber}`, pageWidth / 2, y, { align: 'center' });
+                        y += 6;
+                    }
+
+                    // Título
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('CONTRATO DE ADESAO AO SERVICO', pageWidth / 2, y, { align: 'center' });
+                    y += 8;
+
+                    checkPageBreak(30);
+
+                    // Especificações do Contrato
+                    if (data.contractSpecs && data.contractSpecs.length > 0) {
+                        const boxStartY = y;
+                        y += boxPadding;
+                        
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('ESPECIFICACOES DO CONTRATO', marginLeft + boxPadding, y);
+                        y += 5;
+                        
+                        doc.setFontSize(7);
+                        doc.setFont(undefined, 'normal');
+                        
+                        data.contractSpecs.forEach((spec) => {
+                            checkPageBreak(10);
+                            doc.text(`${spec.item}. ${spec.benefit}`, marginLeft + boxPadding, y, { maxWidth: contentWidth - boxPadding * 3 - 40 });
+                            doc.text(spec.monthlyValue, pageWidth - marginRight - boxPadding - 30, y);
+                            y += lineHeight;
+                        });
+                        
+                        y += 2;
+                        doc.setFont(undefined, 'bold');
+                        doc.text('VALORES:', marginLeft + boxPadding, y);
+                        y += lineHeight;
+                        
+                        doc.setFont(undefined, 'normal');
+                        if (data.totalBenefits) {
+                            doc.text(`Total dos Beneficios: ${data.totalBenefits}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        if (data.discountAmount) {
+                            doc.text(`Desconto Concedido: ${data.discountAmount}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        if (data.totalWithDiscount) {
+                            doc.text(`Total com Desconto: ${data.totalWithDiscount}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        if (data.monthlyContractValue) {
+                            doc.setFont(undefined, 'bold');
+                            doc.text(`VALOR MENSAL DO CONTRATO: ${data.monthlyContractValue}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        
+                        if (data.discountDescription) {
+                            doc.setFont(undefined, 'normal');
+                            const descLines = doc.splitTextToSize(data.discountDescription, contentWidth - boxPadding * 2);
+                            descLines.forEach(line => {
+                                checkPageBreak(10);
+                                doc.text(line, marginLeft + boxPadding, y);
+                                y += lineHeight;
+                            });
+                        }
+                        
+                        y += boxPadding;
+                        
+                        // Desenhar caixa ao redor das especificações
+                        doc.setDrawColor(100, 100, 100);
+                        doc.setLineWidth(0.3);
+                        doc.rect(marginLeft, boxStartY, contentWidth, y - boxStartY);
+                        
+                        y += 6;
+                    }
+
+                    checkPageBreak(25);
+
+                    // Dados da Empresa
+                    const companyBoxStartY = y;
+                    y += boxPadding;
+                    
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('DADOS DA EMPRESA CONTRATANTE', marginLeft + boxPadding, y);
+                    y += 5;
+                    
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(7);
+                    doc.text(`Nome: ${data.companyName}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`CNPJ: ${data.companyDocument}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`Atividade: ${data.companyActivity}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`Endereco: ${data.companyAddress}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`Telefone: ${data.companyPhone}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`E-mail: ${data.companyEmail}`, marginLeft + boxPadding, y);
+                    y += boxPadding;
+                    
+                    // Desenhar caixa ao redor dos dados da empresa
+                    doc.setDrawColor(100, 100, 100);
+                    doc.setLineWidth(0.3);
+                    doc.rect(marginLeft, companyBoxStartY, contentWidth, y - companyBoxStartY);
+                    
+                    y += 6;
+
+                    checkPageBreak(30);
+
+                    // Dados do Representante Legal
+                    const legalRepBoxStartY = y;
+                    y += boxPadding;
+                    
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('REPRESENTANTE LEGAL', marginLeft + boxPadding, y);
+                    y += 5;
+                    
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(7);
+                    doc.text(`Nome: ${data.legalRepName}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`CPF: ${data.legalRepDocument}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`Cargo: ${data.legalRepRole}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    if (data.legalRepType) {
+                        doc.text(`Tipo: ${data.legalRepType}`, marginLeft + boxPadding, y);
+                        y += lineHeight;
+                    }
+                    doc.text(`Telefone: ${data.legalRepPhone}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`E-mail: ${data.legalRepEmail}`, marginLeft + boxPadding, y);
+                    y += boxPadding;
+                    
+                    // Desenhar caixa ao redor dos dados do representante legal
+                    doc.setDrawColor(100, 100, 100);
+                    doc.setLineWidth(0.3);
+                    doc.rect(marginLeft, legalRepBoxStartY, contentWidth, y - legalRepBoxStartY);
+                    
+                    y += 6;
+
+                    checkPageBreak(20);
+
+                    // Administração da Sala (se aplicável)
+                    if (data.roomAdminAuthorized && (data.roomAdminName || data.roomAdminDocument)) {
+                        const adminBoxStartY = y;
+                        y += boxPadding;
+                        
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('ADMINISTRACAO DA SALA', marginLeft + boxPadding, y);
+                        y += 5;
+                        
+                        doc.setFont(undefined, 'normal');
+                        doc.setFontSize(7);
+                        if (data.roomAdminName) {
+                            doc.text(`Nome do Administrador: ${data.roomAdminName}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        if (data.roomAdminDocument) {
+                            doc.text(`CPF do Administrador: ${data.roomAdminDocument}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        y += boxPadding;
+                        
+                        // Desenhar caixa ao redor da administração da sala
+                        doc.setDrawColor(100, 100, 100);
+                        doc.setLineWidth(0.3);
+                        doc.rect(marginLeft, adminBoxStartY, contentWidth, y - adminBoxStartY);
+                        
+                        y += 6;
+                    }
+
+                    checkPageBreak(10);
+
+                    // Data de submissão
+                    doc.setFontSize(7);
+                    doc.text(`Data de Submissao: ${data.submissionDate}`, marginLeft + boxPadding, y);
+                    y += 8;
+
+                    checkPageBreak(10);
+
+                    // ===== CLÁUSULAS CONTRATUAIS =====
+                    doc.addPage();
+                    currentPage++;
+                    drawHeader();
+                    y = 35;
+                    
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('CLAUSULAS CONTRATUAIS', pageWidth / 2, y, { align: 'center' });
+                    y += 8;
+                    
+                    const clausulas = [
+                        { num: '1', titulo: 'Disponibilizacao de Espaco', texto: 'A CONTRATADA disponibilizara a CONTRATANTE o uso de espaco Virtual como descrito no item ESPECIFICACAO DO CONTRATO, conforme plano adotado e politica de preco da CONTRATADA.' },
+                        { num: '2', titulo: 'Recebimento de Correspondencias', texto: 'Fica a CONTRATADA, desde ja autorizada a receber toda e qualquer correspondencia ou documento publico ou particular destinado a CONTRATANTE, excetuando itens proibidos pela legislacao brasileira, como armas, drogas ou quaisquer produtos ilegais.' },
+                        { num: '3', titulo: 'Servicos Extras', texto: 'Se durante o periodo contratual a CONTRATADA disponibilizar servico que nao esteja incluido no objeto deste contrato, a CONTRATANTE devera pagar separadamente o valor do servico extra utilizado segundo a politica de precos praticada pela CONTRATADA.' },
+                        { num: '4', titulo: 'Horario de Funcionamento', texto: 'O horario de funcionamento da CONTRATADA e de segunda a sexta-feira, das 08:00 as 18:00, e aos sabados das 09:00 as 12:00 horas, podendo sofrer alteracoes sem que isso configure falha na prestacao de servicos, desde que nao gere prejuizo ao plano de horas adquirido pelo CONTRATANTE.' },
+                        { num: '5', titulo: 'Caso Fortuito ou Forca Maior', texto: 'Em caso de fortuito ou forca maior, o horario de funcionamento pode ser alterado sem previo aviso a CONTRATANTE, nao importando em violacao da disponibilizacao do atendimento/espaco nos termos do contrato, nem gerando qualquer responsabilidade civil para a CONTRATADA.' },
+                        { num: '6', titulo: 'Uso Adequado', texto: 'Fica expressamente proibida a utilizacao do Espaco e/ou Servicos Combinados para fins ilicitos e outros que violem a moral e os bons costumes.' },
+                        { num: '7', titulo: 'Locacao Avulsa - Normas de Conduta', texto: 'No caso de locacao avulsa para utilizacao dos espacos compartilhados do escritorio (salas de atendimento, reunioes e treinamentos), o nivel de ruido deve ser o minimo possivel para nao perturbar os demais clientes, sendo vedada a entrada de animais, bem como fumar dentro da sede da CONTRATADA.' },
+                        { num: '8', titulo: 'Locacao Avulsa - Responsabilidades', texto: 'No caso de locacao avulsa para utilizacao dos espacos compartilhados do escritorio (salas de atendimento, reunioes e treinamentos), a CONTRATANTE se responsabiliza pelo uso e zelo dos bens moveis da CONTRATADA, devendo indeniza-la pela ma utilizacao do espaco.' },
+                        { num: '9', titulo: 'Permanencia Minima', texto: 'Sobre a permanencia minima, os contratos com apenas enderecos comerciais possuem permanencia minima de 06 (seis) meses. Os contratos com enderecos fiscais (quando houver) terao permanencia minima no plano escolhido de 12 (doze) meses, visto que o processo de alteracao de endereco da empresa e moroso para ambas as partes.' },
+                        { num: '10', titulo: 'Reajuste de Valores', texto: 'O valor da mensalidade previsto neste contrato sera reajustado apos periodo de 12 (doze) meses de vigencia, pelo indice do IGP-M ou por outro indice que vier a substitui-lo.' },
+                        { num: '11', titulo: 'Vigencia e Renovacao', texto: 'O presente contrato entrara em vigor na data de assinatura e sera renovado automaticamente caso nao ocorra manifestacao do CONTRATANTE solicitando seu encerramento. O encerramento do contrato devera ser formalizado por escrito atraves do e-mail: adm@techtowercoworking.com.br.' },
+                        { num: '12', titulo: 'Intransferibilidade', texto: 'O presente contrato e firmado "intuito personae", nao podendo ser cedido ou transferido, no todo ou em parte.' },
+                        { num: '13', titulo: 'Rescisao Automatica e Penalidades', texto: 'O presente contrato rescindira automaticamente nos casos de incendio, desabamento, desapropriacao, falencia da CONTRATADA, infracao contratual ou nao pagamento dos valores contratados. O atraso no pagamento das parcelas mensais acarretara multa de 10% (dez por cento) e acrescimo de juros mensais no valor de 2% (dois por cento).' },
+                        { num: '14', titulo: 'Resilicao Contratual', texto: 'O presente contrato podera ser resilido a qualquer tempo, por qualquer das partes imotivadamente e sem nenhum onus, mediante aviso previo e por escrito, com antecedencia minima de 30 (trinta) dias, cumprindo-se a permanencia minima para planos com endereco fiscal, resultando tao somente na obrigacao da conclusao a bom termo dos servicos contratados vigentes e ja pagos.' },
+                        { num: '15', titulo: 'Multa por Rescisao Sem Aviso', texto: 'Caso o presente contrato venha a ser resilido sem o aviso de 30 (trinta) dias, sera devida a aplicacao de multa contratual de 100% (cem por cento) sobre o valor do contrato mensal.' },
+                        { num: '16', titulo: 'Condicoes para Encerramento', texto: 'O presente contrato so sera encerrado mediante a retirada do telefone e endereco comercial dos canais de divulgacao do CONTRATANTE, e da alteracao do endereco fiscal (quando houver) com a apresentacao do comprovante de inscricao e situacao cadastral do CNPJ da empresa.' },
+                        { num: '17', titulo: 'Autonomia na Prestacao de Servicos', texto: 'Os servicos ora contratados serao prestados pela CONTRATADA com absoluta autonomia, sem qualquer obrigacao quanto a disponibilidade de horarios determinados.' },
+                        { num: '18', titulo: 'Inexistencia de Vinculo Trabalhista', texto: 'Fica pactuada entre as partes a total inexistencia de vinculo trabalhista, excluindo as obrigacoes previdenciarias e os encargos sociais, nao havendo entre CONTRATADA e CONTRATANTE qualquer tipo de relacao de subordinacao, exceto respeito a Politica de Conduta e Etica do espaco contratado.' },
+                        { num: '19', titulo: 'Limitacao de Responsabilidade', texto: 'A responsabilidade da CONTRATADA e somente quanto ao espaco disponibilizado e sua manutencao, devendo aplicar formas habituais de limpeza semanal previamente estabelecida. A atividade da CONTRATADA nao tem qualquer vinculo ou responsabilidade com a atividade exercida pela CONTRATANTE e suas implicacoes, assim como a atividade da CONTRATANTE nao tem qualquer vinculo ou responsabilidade com a atividade exercida pela CONTRATADA e suas implicacoes, isentando desde ja ambas as partes de qualquer custo, onus, taxas, impostos, infracoes ou qualquer ilegalidade que advenha da atividade exclusiva de cada parte.' },
+                        { num: '20', titulo: 'Uso de Imagem da CONTRATADA', texto: 'Fica vedado ao CONTRATANTE o uso do nome/imagem da CONTRATADA sem sua previa autorizacao por escrito, no que tange a propaganda, marketing e afins, tanto na midia escrita, falada, virtual ou qualquer outro meio de divulgacao.' },
+                        { num: '21', titulo: 'Uso de Imagem da CONTRATANTE', texto: 'A CONTRATANTE autoriza a veiculacao do seu direito de imagem gratuitamente a CONTRATADA, podendo esta exibi-la nos seus meios de comunicacao interna e externa, como sites, redes sociais, eventos, materias de propaganda e afins.' },
+                        { num: '22', titulo: 'Endereco Comercial', texto: 'Fica autorizada ao CONTRATANTE a utilizacao do endereco da CONTRATADA como seu endereco comercial de divulgacao (cartoes de visita, sites, redes sociais e material grafico).' },
+                        { num: '23', titulo: 'Restricao de Endereco Fiscal', texto: 'Fica vedada ao CONTRATANTE a utilizacao do endereco da CONTRATADA COMO SEU ENDERECO FISCAL (Domicilio tributario perante JUCESP, cartorio, receita federal e secretaria da fazenda), em caso de contratos sem a opcao "Endereco Fiscal".' },
+                        { num: '24', titulo: 'Agendamento de Salas', texto: 'O uso das salas de reuniao devera ser programado mediante agendamento previo, de acordo com a disponibilidade da agenda.' },
+                        { num: '25', titulo: 'Sinalizacao', texto: 'Nao sera permitido colocar placas de sinalizacao do CONTRATANTE dentro das dependencias da CONTRATADA.' },
+                        { num: '26', titulo: 'Titulo Executivo Extrajudicial', texto: 'O presente instrumento e aceito pelas partes como titulo executivo extrajudicial, na forma do artigo 784, inciso III, do Codigo de Processo Civil.' }
+                    ];
+                    
+                    doc.setFontSize(7);
+                    clausulas.forEach(clausula => {
+                        checkPageBreak(10);
+                        
+                        // Título da cláusula
+                        doc.setFont(undefined, 'bold');
+                        const tituloText = `${clausula.num}. ${clausula.titulo}`;
+                        doc.text(tituloText, marginLeft + 5, y);
+                        y += lineHeight;
+                        
+                        // Texto da cláusula
+                        doc.setFont(undefined, 'normal');
+                        const textoLines = doc.splitTextToSize(clausula.texto, contentWidth - 10);
+                        textoLines.forEach(line => {
+                            checkPageBreak(10);
+                            doc.text(line, marginLeft + 5, y);
+                            y += lineHeight;
+                        });
+                        
+                        y += 1.5; // Espaço entre cláusulas
+                    });
+                    
+                    checkPageBreak(15);
+                    y += 5;
+                    
+                    // Foro
+                    doc.setFont(undefined, 'bold');
+                    const foroText = 'As partes elegem o foro da cidade de Sao Jose dos Campos/SP, com exclusao de qualquer outro, como competente para dirimir todas e quaisquer duvidas oriundas do presente contrato.';
+                    const foroLines = doc.splitTextToSize(foroText, contentWidth - 10);
+                    foroLines.forEach(line => {
+                        checkPageBreak(10);
+                        doc.text(line, marginLeft + 5, y);
+                        y += lineHeight;
+                    });
+
+                    // Assinaturas
+                    checkPageBreak(70);
+                    y += 15;
+                    
+                    // Data e local
+                    const dataAtual = new Date();
+                    const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 
+                                   'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+                    const dataFormatada = `São José dos Campos, ${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()}`;
+                    
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(dataFormatada, pageWidth / 2, y, { align: 'center' });
+                    y += 15;
+                    
+                    doc.setFontSize(8);
+                    const signatureSpacing = contentWidth / 2;
+                    const leftSignature = marginLeft + 15;
+                    const rightSignature = marginLeft + signatureSpacing + 15;
+                    
+                    // Primeira linha de assinaturas
+                    doc.text('_______________________________________', leftSignature, y);
+                    doc.text('_______________________________________', rightSignature, y);
+                    y += 5;
+                    doc.text('CONTRATANTE', leftSignature, y);
+                    doc.text('CONTRATADA', rightSignature, y);
+                    y += 3;
+                    doc.text(data.legalRepName, leftSignature, y);
+                    doc.text('Tech Tower Coworking', rightSignature, y);
+                    
+                    // Segunda linha de assinaturas (testemunhas)
+                    y += 15;
+                    checkPageBreak(30);
+                    doc.text('_______________________________________', leftSignature, y);
+                    doc.text('_______________________________________', rightSignature, y);
+                    y += 5;
+                    doc.text('TESTEMUNHA 1', leftSignature, y);
+                    doc.text('TESTEMUNHA 2', rightSignature, y);
+
+                    // Adicionar numeração de páginas em todas as páginas
+                    const totalPages = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) {
+                        doc.setPage(i);
+                        drawFooter(i, totalPages);
+                    }
+
+                    // Salvar PDF
+                    const fileName = `contrato_${data.companyName.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`;
+                    doc.save(fileName);
+
+                    return true;
+                } catch (error) {
+                    console.error('Erro ao gerar PDF:', error);
+                    alert('Ocorreu um erro ao gerar o PDF. Tente novamente.');
+                    return false;
+                }
+            },
+
+            /**
+             * Gera um PDF e retorna como Blob (sem fazer download)
+             * @param {Object} data - Dados do contrato
+             * @returns {Promise<Blob>} PDF como Blob
+             */
+            async generatePDFBlob(data) {
+                try {
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    
+                    // Usar o mesmo código de geração acima...
+                    // (copiando toda a lógica de geração)
+                    const pageWidth = doc.internal.pageSize.width;
+                    const pageHeight = doc.internal.pageSize.height;
+                    const marginLeft = 15;
+                    const marginRight = 15;
+                    const contentWidth = pageWidth - marginLeft - marginRight;
+                    const boxPadding = 5;
+                    
+                    let y = 35;
+                    const lineHeight = 4;
+                    const marginBottom = 25;
+                    let currentPage = 1;
+
+                    const drawHeader = () => {
+                        const headerY = 10;
+                        doc.setDrawColor(103, 126, 234);
+                        doc.setFillColor(103, 126, 234);
+                        doc.circle(20, headerY + 5, 8, 'F');
+                        doc.setTextColor(255, 255, 255);
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('TT', 20, headerY + 7, { align: 'center' });
+                        doc.setTextColor(0, 0, 0);
+                        doc.setFontSize(10);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('TECH TOWER COWORKING', 35, headerY + 3);
+                        doc.setFontSize(6);
+                        doc.setFont(undefined, 'normal');
+                        doc.text('AV. DR. NELSON D\'AVILA, 389 - SALA 105A - SAO JOSE DOS CAMPOS/SP', 35, headerY + 7);
+                        doc.text('www.techtowercoworking.com.br - (12) 98198-0288', 35, headerY + 10);
+                        doc.setDrawColor(150, 150, 150);
+                        doc.setLineWidth(0.3);
+                        doc.line(marginLeft, headerY + 15, pageWidth - marginRight, headerY + 15);
+                    };
+
+                    const drawFooter = (pageNum, totalPages) => {
+                        doc.setFontSize(7);
+                        doc.setFont(undefined, 'normal');
+                        doc.setTextColor(100, 100, 100);
+                        doc.text(`Página ${pageNum}/${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+                    };
+
+                    const checkPageBreak = (additionalSpace = 0) => {
+                        if (y + additionalSpace > pageHeight - marginBottom) {
+                            doc.addPage();
+                            currentPage++;
+                            drawHeader();
+                            y = 35;
+                        }
+                    };
+
+                    drawHeader();
+
+                    if (data.contractNumber) {
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'bold');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(`Contrato No: ${data.contractNumber}`, pageWidth / 2, y, { align: 'center' });
+                        y += 6;
+                    }
+
+                    doc.setFontSize(11);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('CONTRATO DE ADESAO AO SERVICO', pageWidth / 2, y, { align: 'center' });
+                    y += 8;
+
+                    checkPageBreak(30);
+
+                    if (data.contractSpecs && data.contractSpecs.length > 0) {
+                        const boxStartY = y;
+                        y += boxPadding;
+                        doc.setFontSize(9);
+                        doc.setFont(undefined, 'bold');
+                        doc.text('ESPECIFICACOES DO CONTRATO', marginLeft + boxPadding, y);
+                        y += 5;
+                        doc.setFontSize(7);
+                        doc.setFont(undefined, 'normal');
+                        
+                        data.contractSpecs.forEach((spec) => {
+                            checkPageBreak(10);
+                            doc.text(`${spec.item}. ${spec.benefit}`, marginLeft + boxPadding, y, { maxWidth: contentWidth - boxPadding * 3 - 40 });
+                            doc.text(spec.monthlyValue, pageWidth - marginRight - boxPadding - 30, y);
+                            y += lineHeight;
+                        });
+                        
+                        y += 2;
+                        doc.setFont(undefined, 'bold');
+                        doc.text('VALORES:', marginLeft + boxPadding, y);
+                        y += lineHeight;
+                        doc.setFont(undefined, 'normal');
+                        
+                        if (data.totalBenefits) {
+                            doc.text(`Total dos Beneficios: ${data.totalBenefits}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        if (data.discountAmount) {
+                            doc.text(`Desconto Concedido: ${data.discountAmount}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        if (data.totalWithDiscount) {
+                            doc.text(`Total com Desconto: ${data.totalWithDiscount}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        if (data.monthlyContractValue) {
+                            doc.setFont(undefined, 'bold');
+                            doc.text(`VALOR MENSAL DO CONTRATO: ${data.monthlyContractValue}`, marginLeft + boxPadding, y);
+                            y += lineHeight;
+                        }
+                        if (data.discountDescription) {
+                            doc.setFont(undefined, 'normal');
+                            const descLines = doc.splitTextToSize(data.discountDescription, contentWidth - boxPadding * 2);
+                            descLines.forEach(line => {
+                                checkPageBreak(10);
+                                doc.text(line, marginLeft + boxPadding, y);
+                                y += lineHeight;
+                            });
+                        }
+                        
+                        y += boxPadding;
+                        doc.setDrawColor(100, 100, 100);
+                        doc.setLineWidth(0.3);
+                        doc.rect(marginLeft, boxStartY, contentWidth, y - boxStartY);
+                        y += 6;
+                    }
+
+                    checkPageBreak(25);
+
+                    const companyBoxStartY = y;
+                    y += boxPadding;
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('DADOS DA EMPRESA CONTRATANTE', marginLeft + boxPadding, y);
+                    y += 5;
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(7);
+                    doc.text(`Nome: ${data.companyName}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`CNPJ: ${data.companyDocument}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`Atividade: ${data.companyActivity}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`Endereco: ${data.companyAddress}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`Telefone: ${data.companyPhone}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`E-mail: ${data.companyEmail}`, marginLeft + boxPadding, y);
+                    y += boxPadding;
+                    doc.setDrawColor(100, 100, 100);
+                    doc.setLineWidth(0.3);
+                    doc.rect(marginLeft, companyBoxStartY, contentWidth, y - companyBoxStartY);
+                    y += 6;
+
+                    checkPageBreak(30);
+
+                    const legalRepBoxStartY = y;
+                    y += boxPadding;
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'bold');
+                    doc.text('REPRESENTANTE LEGAL', marginLeft + boxPadding, y);
+                    y += 5;
+                    doc.setFont(undefined, 'normal');
+                    doc.setFontSize(7);
+                    doc.text(`Nome: ${data.legalRepName}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`CPF: ${data.legalRepDocument}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    doc.text(`Cargo: ${data.legalRepRole}`, marginLeft + boxPadding, y);
+                    y += lineHeight;
+                    if (data.legalRepType) {
+                        doc.text(`Tipo: ${data.legalRepType}`, marginLeft + boxPadding, y);
+                        y += lineHeight;
+                    }
+                    y += boxPadding;
+                    doc.setDrawColor(100, 100, 100);
+                    doc.setLineWidth(0.3);
+                    doc.rect(marginLeft, legalRepBoxStartY, contentWidth, y - legalRepBoxStartY);
+                    y += 6;
+
+                    // Assinaturas
+                    checkPageBreak(70);
+                    y += 15;
+                    
+                    // Data e local
+                    const dataAtual = new Date();
+                    const meses = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 
+                                   'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+                    const dataFormatada = `São José dos Campos, ${dataAtual.getDate()} de ${meses[dataAtual.getMonth()]} de ${dataAtual.getFullYear()}`;
+                    
+                    doc.setFontSize(9);
+                    doc.setFont(undefined, 'normal');
+                    doc.text(dataFormatada, pageWidth / 2, y, { align: 'center' });
+                    y += 15;
+                    
+                    doc.setFontSize(8);
+                    const signatureSpacing = contentWidth / 2;
+                    const leftSignature = marginLeft + 15;
+                    const rightSignature = marginLeft + signatureSpacing + 15;
+                    
+                    // Primeira linha de assinaturas
+                    doc.text('_______________________________________', leftSignature, y);
+                    doc.text('_______________________________________', rightSignature, y);
+                    y += 5;
+                    doc.text('CONTRATANTE', leftSignature, y);
+                    doc.text('CONTRATADA', rightSignature, y);
+                    y += 3;
+                    doc.text(data.legalRepName, leftSignature, y);
+                    doc.text('Tech Tower Coworking', rightSignature, y);
+                    
+                    // Segunda linha de assinaturas (testemunhas)
+                    y += 15;
+                    checkPageBreak(30);
+                    doc.text('_______________________________________', leftSignature, y);
+                    doc.text('_______________________________________', rightSignature, y);
+                    y += 5;
+                    doc.text('TESTEMUNHA 1', leftSignature, y);
+                    doc.text('TESTEMUNHA 2', rightSignature, y);
+
+                    const totalPages = doc.internal.getNumberOfPages();
+                    for (let i = 1; i <= totalPages; i++) {
+                        doc.setPage(i);
+                        drawFooter(i, totalPages);
+                    }
+
+                    // Retornar como Blob ao invés de fazer download
+                    return doc.output('blob');
+                } catch (error) {
+                    console.error('Erro ao gerar PDF Blob:', error);
+                    return null;
+                }
+            }
+        };
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            // Carregar dados
+            const formData = DataManager.loadFormData();
+            
+            if (formData) {
+                // Renderizar detalhes
+                UIManager.renderContractDetails(formData);
+
+                // Configurar botão de download
+                const downloadButton = document.getElementById('downloadPDF');
+                downloadButton.addEventListener('click', async () => {
+                    downloadButton.disabled = true;
+                    downloadButton.innerHTML = '<span class="spinner-border spinner-border-sm mr-2"></span>Gerando PDF...';
+                    
+                    const success = await PDFGenerator.generatePDF(formData);
+                    
+                    if (success) {
+                        alert('PDF gerado com sucesso!');
+                    }
+                    
+                    downloadButton.disabled = false;
+                    downloadButton.innerHTML = 'Gerar PDF do Contrato';
+                });
+
+                // Configurar botão de enviar para ZapSign
+                const zapSignButton = document.getElementById('sendToZapSign');
+                zapSignButton.addEventListener('click', async () => {
+                    // Verificar se a API está configurada
+                    if (!ZapSignAPI.getApiToken()) {
+                        if (confirm('A API ZapSign não está configurada. Deseja configurar agora?')) {
+                            showZapSignConfig();
+                        }
+                        return;
+                    }
+
+                    if (!confirm('Deseja enviar este contrato para assinatura digital via ZapSign?')) {
+                        return;
+                    }
+
+                    try {
+                        zapSignButton.disabled = true;
+                        zapSignButton.innerHTML = '<span class="spinner-border spinner-border-sm mr-2"></span>Processando...';
+
+                        // Primeiro, gerar o PDF
+                        const pdfBlob = await PDFGenerator.generatePDFBlob(formData);
+                        
+                        if (!pdfBlob) {
+                            throw new Error('Erro ao gerar PDF');
+                        }
+
+                        // Converter Blob para File
+                        const pdfFile = new File(
+                            [pdfBlob], 
+                            `Contrato_${formData.contractNumber}.pdf`,
+                            { type: 'application/pdf' }
+                        );
+
+                        // Enviar para ZapSign
+                        const result = await ContractSignatureManager.sendContractForSignature(
+                            formData,
+                            pdfFile
+                        );
+
+                        alert(`✅ Contrato enviado com sucesso!\n\nToken: ${result.token}\nStatus: ${result.status}\n\nOs signatários receberão um email para assinatura.`);
+
+                    } catch (error) {
+                        console.error('Erro ao enviar para ZapSign:', error);
+                        alert(`❌ Erro ao enviar contrato:\n${error.message}`);
+                    } finally {
+                        zapSignButton.disabled = false;
+                        zapSignButton.innerHTML = '<i class="fas fa-file-signature"></i> Enviar para ZapSign';
+                    }
+                });
+
+                // Configurar botão de gerar cobrança
+                const paymentButton = document.getElementById('createPayment');
+                paymentButton.addEventListener('click', async () => {
+                    // Verificar se a API está configurada
+                    if (!AsaasAPI.getApiKey()) {
+                        if (confirm('A API Asaas não está configurada. Deseja configurar agora?')) {
+                            showAsaasConfig();
+                        }
+                        return;
+                    }
+
+                    if (!confirm('Deseja gerar uma cobrança no Asaas para este contrato?')) {
+                        return;
+                    }
+
+                    try {
+                        paymentButton.disabled = true;
+                        paymentButton.innerHTML = '<span class="spinner-border spinner-border-sm mr-2"></span>Processando...';
+
+                        // Criar cliente e cobrança
+                        const result = await ContractPaymentManager.createContractPayment(formData);
+
+                        let message = `✅ Cobrança criada com sucesso!\n\n`;
+                        message += `Cliente ID: ${result.customer.id}\n`;
+                        message += `Cobrança ID: ${result.payment.id}\n`;
+                        message += `Valor: R$ ${result.payment.value}\n`;
+                        message += `Vencimento: ${new Date(result.payment.dueDate).toLocaleDateString('pt-BR')}\n`;
+                        message += `Status: ${result.payment.status}\n\n`;
+                        
+                        if (result.payment.bankSlipUrl) {
+                            message += `Boleto disponível!\n`;
+                            if (confirm(message + '\nDeseja abrir o boleto agora?')) {
+                                window.open(result.payment.bankSlipUrl, '_blank');
+                            }
+                        } else {
+                            alert(message);
+                        }
+
+                    } catch (error) {
+                        console.error('Erro ao gerar cobrança:', error);
+                        alert(`❌ Erro ao gerar cobrança:\n${error.message}`);
+                    } finally {
+                        paymentButton.disabled = false;
+                        paymentButton.innerHTML = '<i class="fas fa-dollar-sign"></i> Gerar Cobrança';
+                    }
+                });
+
+                console.log('Página de revisão carregada com sucesso');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de Gestão de Contratos - Tech Tower Coworking">
+    <title>Sistema de Contratos - Tech Tower Coworking</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-building"></i> Tech Tower</h3>
+            <button class="sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li class="menu-item active" data-page="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </li>
+            <li class="menu-item" data-page="contracts">
+                <i class="fas fa-file-contract"></i>
+                <span>Novo Contrato</span>
+            </li>
+            <li class="menu-item" data-page="signatures">
+                <i class="fas fa-file-signature"></i>
+                <span>Assinaturas</span>
+            </li>
+            <li class="menu-item" data-page="payments">
+                <i class="fas fa-money-bill-wave"></i>
+                <span>Pagamentos</span>
+            </li>
+            <li class="menu-item" data-page="history">
+                <i class="fas fa-history"></i>
+                <span>Histórico</span>
+            </li>
+            <li class="menu-item" data-page="settings">
+                <i class="fas fa-cog"></i>
+                <span>Configurações</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="page-title" id="pageTitle">Dashboard</h1>
+            <div class="user-info">
+                <i class="fas fa-user-circle"></i>
+                <span>Admin</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div class="page-content active" id="dashboardPage">
+            <div class="company-info-card">
+                <h2 class="company-name">TECH TOWER COWORKING</h2>
+                <p class="company-legal-name">(JM2 SERVIÇOS ADMINISTRATIVOS LTDA – ME)</p>
+                <p class="company-address">
+                    AV. DR. NELSON D'ÁVILA, 389 – SALA 105A – CENTRO EMPRESARIAL TECH TOWER<br>
+                    CENTRO - CEP 12245-641 – SÃO JOSÉ DOS CAMPOS/SP
+                </p>
+            </div>
+
+            <!-- Dashboard Cards -->
+            <div class="dashboard-cards">
+                <div class="dashboard-card clickable" onclick="navigateToPage('history')" title="Ver todos os contratos">
+                    <div class="card-icon pending">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="pendingContractsCount">0</h3>
+                        <p>Contratos Pendentes</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card clickable" onclick="navigateToPage('history')" title="Ver contratos assinados">
+                    <div class="card-icon signed">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="signedContractsCount">0</h3>
+                        <p>Contratos Assinados</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card clickable" onclick="navigateToPage('payments')" title="Ver pagamentos pendentes">
+                    <div class="card-icon payment">
+                        <i class="fas fa-dollar-sign"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="pendingPaymentsCount">0</h3>
+                        <p>Pagamentos Pendentes</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-card clickable" onclick="navigateToPage('payments')" title="Ver detalhes de receita">
+                    <div class="card-icon revenue">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="totalRevenue">R$ 0,00</h3>
+                        <p>Receita do Mês</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="dashboard-section">
+                <h3 class="section-title"><i class="fas fa-list"></i> Atividades Recentes</h3>
+                <div class="activity-list" id="recentActivity">
+                    <p class="text-muted text-center">Nenhuma atividade recente</p>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="dashboard-section">
+                <h3 class="section-title"><i class="fas fa-bolt"></i> Ações Rápidas</h3>
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="navigateToPage('contracts')">
+                        <i class="fas fa-plus-circle"></i>
+                        <span>Novo Contrato</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="navigateToPage('signatures')">
+                        <i class="fas fa-signature"></i>
+                        <span>Ver Assinaturas</span>
+                    </button>
+                    <button class="quick-action-btn" onclick="navigateToPage('payments')">
+                        <i class="fas fa-receipt"></i>
+                        <span>Ver Pagamentos</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contracts Page -->
+        <div class="page-content" id="contractsPage">
+            <div class="container">
+                <header class="text-center mb-5">
+                    <h1>CONTRATO DE ADESÃO AO SERVIÇO</h1>
+                    <p class="contract-intro">
+                        Pelo presente instrumento particular que fazem parte entre si, de um lado <strong>JM2 SERVIÇOS ADMINISTRATIVOS LTDA</strong>, 
+                        nome comercial de <strong>TECH TOWER COWORKING</strong>, pessoa jurídica de direito privado inscrita no CNPJ sob 
+                        nº 52.606.303/0001-56, com endereço na cidade de São José dos Campos, Estado de São Paulo, 
+                        na AV. DR. NELSON D'ÁVILA, Nº 389 - SALA 105A, CENTRO, CEP 12245-641, denominada simplesmente 
+                        <strong>CONTRATADA</strong>, e de outro lado, o <strong>CONTRATANTE</strong> abaixo qualificado, têm entre si, 
+                        como justas e contratada as seguintes cláusulas e condições constantes do presente contrato:
+                    </p>
+                </header>
+
+                <div class="contract-number-section">
+                    <label for="contractNumber">Número do Contrato:</label>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="text" id="contractNumber" placeholder="CEF 183-2025" class="form-control" style="max-width: 200px;">
+                        <button type="button" class="btn btn-sm btn-primary" onclick="generateNextContractNumber()">
+                            <i class="fas fa-sync"></i> Gerar Próximo
+                        </button>
+                    </div>
+                </div>
+
+        <form id="contractForm">
+            <!-- Dados da Empresa -->
+            <section class="mb-3">
+                <h3 class="section-title">Dados da Empresa</h3>
+                
+                <div class="form-group">
+                    <label for="companyName">Nome da Empresa <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="companyName" required 
+                           placeholder="Digite o nome completo da empresa">
+                </div>
+
+                <div class="form-group">
+                    <label for="companyDocument">CNPJ <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="companyDocument" required 
+                           placeholder="00.000.000/0000-00" pattern="\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}">
+                </div>
+
+                <div class="form-group">
+                    <label for="companyActivity">Atividade da Empresa <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="companyActivity" required 
+                           placeholder="Ex: Consultoria em TI">
+                </div>
+
+                <div class="form-group">
+                    <label for="companyAddress">Endereço Completo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="companyAddress" required 
+                           placeholder="Rua, número, complemento, bairro, cidade, estado, CEP">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="companyPhone">Telefone <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="companyPhone" required 
+                               placeholder="(00) 00000-0000" pattern="\(\d{2}\) \d{4,5}-\d{4}">
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="companyEmail">E-mail <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="companyEmail" required 
+                               placeholder="contato@empresa.com.br">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Especificações do Contrato -->
+            <section class="mb-5">
+                <h3 class="section-title">Especificações do Contrato</h3>
+                
+                <div class="form-group">
+                    <label>Descrição do Plano Mensal:</label>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="contractSpecTable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 50px;">Item</th>
+                                    <th style="width: auto;">Benefícios</th>
+                                    <th style="width: 120px;">Valor Mensal</th>
+                                    <th style="width: 80px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contractSpecBody">
+                                <tr class="spec-row">
+                                    <td class="spec-item-number"><input type="text" class="form-control form-control-sm text-center" value="01" readonly></td>
+                                    <td class="spec-benefits"><textarea class="form-control form-control-sm" rows="2" placeholder="Ex: ENDEREÇO COMERCIAL">ENDEREÇO COMERCIAL (Para divulgação de endereço comercial em mídias físicas ou digitais)</textarea></td>
+                                    <td class="spec-value"><input type="text" class="form-control form-control-sm" placeholder="R$ 0,00" value="R$ 150,00"></td>
+                                    <td class="text-center spec-actions">
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeSpecRow(this)" title="Remover">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="spec-row">
+                                    <td class="spec-item-number"><input type="text" class="form-control form-control-sm text-center" value="02" readonly></td>
+                                    <td class="spec-benefits"><textarea class="form-control form-control-sm" rows="2" placeholder="Ex: ENDEREÇO FISCAL">ENDEREÇO FISCAL (Para criação ou alteração de domicílio fiscal e recebimento de correspondências oficiais)</textarea></td>
+                                    <td class="spec-value"><input type="text" class="form-control form-control-sm" placeholder="R$ 0,00" value="R$ 150,00"></td>
+                                    <td class="text-center spec-actions">
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeSpecRow(this)" title="Remover">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <tr class="spec-row">
+                                    <td class="spec-item-number"><input type="text" class="form-control form-control-sm text-center" value="03" readonly></td>
+                                    <td class="spec-benefits"><textarea class="form-control form-control-sm" rows="2" placeholder="Descrição do benefício">Uso de 01 (uma) posição na estação de trabalho 2X na semana no format Full-Time com estacionamento rotativo no terreo.</textarea></td>
+                                    <td class="spec-value"><input type="text" class="form-control form-control-sm" placeholder="R$ 0,00" value="R$ 790,00"></td>
+                                    <td class="text-center spec-actions">
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removeSpecRow(this)" title="Remover">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4">
+                                        <button type="button" class="btn btn-sm btn-success btn-block" onclick="addSpecRow()">
+                                            + Adicionar Nova Linha
+                                        </button>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="totalBenefits"><strong>Total dos Benefícios Ofertados:</strong></label>
+                            <input type="text" class="form-control" id="totalBenefits" placeholder="R$ 0,00" value="R$ 1.090,00">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="discountAmount"><strong>Desconto Concedido:</strong></label>
+                            <input type="text" class="form-control" id="discountAmount" placeholder="R$ 0,00" value="R$ 640,00">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="totalWithDiscount"><strong>Total com Desconto:</strong></label>
+                            <input type="text" class="form-control" id="totalWithDiscount" placeholder="R$ 0,00" value="R$ 450,00">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="monthlyContractValue"><strong>Valor Mensal do Contrato:</strong></label>
+                            <input type="text" class="form-control font-weight-bold" id="monthlyContractValue" placeholder="R$ 0,00" value="R$ 1.090,00">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="discountDescription"><strong>Descrição do Desconto:</strong></label>
+                    <textarea class="form-control" id="discountDescription" rows="3" placeholder="Descreva os detalhes do desconto concedido...">Aplicado uma redução de R$ 640,00, ou seja, valor mensal de R$ 450,00 (Quatrocentos e Cinquenta Reais) para utilização do endereço comercial e/ou fiscal e estação de trabalho.</textarea>
+                </div>
+            </section>
+
+            <!-- Dados do Representante Legal -->
+            <section class="mb-3">
+                <h3 class="section-title">Dados do Representante Legal</h3>
+
+                <div class="form-group">
+                    <label for="legalRepName">Nome Completo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="legalRepName" required 
+                           placeholder="Digite o nome completo">
+                </div>
+
+                <div class="form-group">
+                    <label for="legalRepDocument">CPF <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="legalRepDocument" required 
+                           placeholder="000.000.000-00" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}">
+                </div>
+
+                <div class="form-group">
+                    <label for="legalRepRole">Cargo <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="legalRepRole" required 
+                           placeholder="Ex: Diretor, Sócio-administrador">
+                </div>
+
+                <div class="form-group">
+                    <label>Tipo de Representante Legal <span class="text-danger">*</span></label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="legalRepType" id="legalRepTypeSocio" value="SÓCIO" required>
+                        <label class="form-check-label" for="legalRepTypeSocio">
+                            Sócio
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="legalRepType" id="legalRepTypeAdmin" value="ADMINISTRADOR" required>
+                        <label class="form-check-label" for="legalRepTypeAdmin">
+                            Administrador
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="legalRepType" id="legalRepTypeProcurador" value="PROCURADOR(A)" required>
+                        <label class="form-check-label" for="legalRepTypeProcurador">
+                            Procurador(a)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-md-6">
+                        <label for="legalRepPhone">Telefone <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control" id="legalRepPhone" required 
+                               placeholder="(00) 00000-0000" pattern="\(\d{2}\) \d{4,5}-\d{4}">
+                    </div>
+
+                    <div class="form-group col-md-6">
+                        <label for="legalRepEmail">E-mail <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="legalRepEmail" required 
+                               placeholder="representante@empresa.com.br">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Administração da Sala -->
+            <section class="mb-3">
+                <h3 class="section-title">Administração da Sala (Opcional)</h3>
+
+                <div class="form-group form-check">
+                    <input type="checkbox" class="form-check-input" id="roomAdminAuthorized">
+                    <label class="form-check-label" for="roomAdminAuthorized">
+                        Autorizar administração da sala por terceiros
+                    </label>
+                </div>
+
+                <div id="roomAdminDocumentGroup" style="display: none;">
+                    <div class="form-group">
+                        <label for="roomAdminName">Nome do Administrador da Sala</label>
+                        <input type="text" class="form-control" id="roomAdminName" 
+                               placeholder="Digite o nome completo do administrador">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="roomAdminDocument">CPF do Administrador da Sala</label>
+                        <input type="text" class="form-control" id="roomAdminDocument" 
+                               placeholder="000.000.000-00" pattern="\d{3}\.\d{3}\.\d{3}-\d{2}">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Cláusulas Contratuais -->
+            <section class="contract-terms mb-5">
+                <h2 class="text-center mb-4">Cláusulas Contratuais</h2>
+
+                <div class="clause">
+                    <h5>1. Disponibilização de Espaço</h5>
+                    <p>A CONTRATADA disponibilizará à CONTRATANTE o uso de espaço Virtual como descrito no item ESPECIFICAÇÃO DO CONTRATO, conforme plano adotado e política de preço da CONTRATADA.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>2. Recebimento de Correspondências</h5>
+                    <p>Fica a CONTRATADA, desde já autorizada a receber toda e qualquer correspondência ou documento público ou particular destinado à CONTRATANTE, excetuando itens proibidos pela legislação brasileira, como armas, drogas ou quaisquer produtos ilegais.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>3. Serviços Extras</h5>
+                    <p>Se durante o período contratual a CONTRATADA disponibilizar serviço que não esteja incluído no objeto deste contrato, a CONTRATANTE deverá pagar separadamente o valor do serviço extra utilizado segundo a política de preços praticada pela CONTRATADA.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>4. Horário de Funcionamento</h5>
+                    <p>O horário de funcionamento da CONTRATADA é de segunda à sexta-feira, das 08:00 às 18:00, e aos sábados apenas com agendamento antecipado, podendo sofrer alterações sem que isso configure falha na prestação de serviços, desde que não gere prejuízo ao plano de horas adquirido pelo CONTRATANTE.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>5. Caso Fortuito ou Força Maior</h5>
+                    <p>Em caso de fortuito ou força maior, o horário de funcionamento pode ser alterado sem prévio aviso à CONTRATANTE, não importando em violação da disponibilização do atendimento/espaço nos termos do contrato, nem gerando qualquer responsabilidade civil para a CONTRATADA.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>6. Uso Adequado</h5>
+                    <p>Fica expressamente proibida a utilização do Espaço e/ou Serviços Combinados para fins ilícitos e outros que violem a moral e os bons costumes.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>7. Locação Avulsa - Normas de Conduta</h5>
+                    <p>No caso de locação avulsa para utilização dos espaços compartilhados do escritório (salas de atendimento, reuniões e treinamentos), o nível de ruído deve ser o mínimo possível para não perturbar os demais clientes, sendo vedada a entrada de animais, bem como fumar dentro da sede da CONTRATADA.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>8. Locação Avulsa - Responsabilidades</h5>
+                    <p>No caso de locação avulsa para utilização dos espaços compartilhados do escritório (salas de atendimento, reuniões e treinamentos), a CONTRATANTE se responsabiliza pelo uso e zelo dos bens móveis da CONTRATADA, devendo indenizá-la pela má utilização do espaço.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>9. Permanência Mínima</h5>
+                    <p>Sobre a permanência mínima, os contratos com apenas endereços comerciais possuem permanência mínima de 06 (seis) meses. Os contratos com endereços fiscais (quando houver) terão permanência mínima no plano escolhido de 12 (doze) meses, visto que o processo de alteração de endereço da empresa é moroso para ambas as partes do contrato.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>10. Reajuste de Valores</h5>
+                    <p>O valor da mensalidade previsto neste contrato será reajustado após período de 12 (doze) meses de vigência, pelo índice do IGP-M ou por outro índice que vier a substituí-lo.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>11. Vigência e Renovação</h5>
+                    <p>O presente contrato entrará em vigor na data de assinatura e será renovado automaticamente caso não ocorra manifestação do CONTRATANTE solicitando seu encerramento. O encerramento do contrato deverá ser formalizado por escrito através do e-mail: <a href="mailto:adm@techtowercoworking.com.br">adm@techtowercoworking.com.br</a>.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>12. Intransferibilidade</h5>
+                    <p>O presente contrato é firmado "intuito personae", não podendo ser cedido ou transferido, no todo ou em parte.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>13. Rescisão Automática e Penalidades</h5>
+                    <p>O presente contrato rescindirá automaticamente nos casos de incêndio, desabamento, desapropriação, falência da CONTRATADA, infração contratual ou não pagamento dos valores contratados. O atraso no pagamento das parcelas mensais acarretará multa de 10% (dez por cento) e acréscimo de juros mensais no valor de 2% (dois por cento).</p>
+                </div>
+
+                <div class="clause">
+                    <h5>14. Resilição Contratual</h5>
+                    <p>O presente contrato poderá ser resilido a qualquer tempo, por qualquer das partes imotivadamente e sem nenhum ônus, mediante aviso prévio e por escrito, com antecedência mínima de 30 (trinta) dias, cumprindo-se a permanência mínima para planos com endereço fiscal, resultando tão somente na obrigação da conclusão a bom termo dos serviços contratados vigentes e já pagos.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>15. Multa por Rescisão Sem Aviso</h5>
+                    <p>Caso o presente contrato venha a ser resilido sem o aviso de 30 (trinta) dias, será devida a aplicação de multa contratual de 100% (cem por cento) sobre o valor do contrato mensal.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>16. Condições para Encerramento</h5>
+                    <p>O presente contrato só será encerrado mediante a retirada do telefone e endereço comercial dos canais de divulgação do CONTRATANTE, e da alteração do endereço fiscal (quando houver) com a apresentação do comprovante de inscrição e situação cadastral do CNPJ da empresa.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>17. Autonomia na Prestação de Serviços</h5>
+                    <p>Os serviços ora contratados serão prestados pela CONTRATADA com absoluta autonomia, sem qualquer obrigação quanto à disponibilidade de horários determinados.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>18. Inexistência de Vínculo Trabalhista</h5>
+                    <p>Fica pactuada entre as partes a total inexistência de vínculo trabalhista, excluindo as obrigações previdenciárias e os encargos sociais, não havendo entre CONTRATADA e CONTRATANTE qualquer tipo de relação de subordinação, exceto respeito à Política de Conduta e Ética do espaço contratado.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>19. Limitação de Responsabilidade</h5>
+                    <p>A responsabilidade da CONTRATADA é somente quanto ao espaço disponibilizado e sua manutenção, devendo aplicar formas habituais de limpeza semanal previamente estabelecida. A atividade da CONTRATADA não tem qualquer vínculo ou responsabilidade com a atividade exercida pela CONTRATANTE e suas implicações, assim como a atividade da CONTRATANTE não tem qualquer vínculo ou responsabilidade com a atividade exercida pela CONTRATADA e suas implicações, isentando desde já ambas as partes de qualquer custo, ônus, taxas, impostos, infrações ou qualquer ilegalidade que advenha da atividade exclusiva de cada parte.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>20. Uso de Imagem da CONTRATADA</h5>
+                    <p>Fica vedado ao CONTRATANTE o uso do nome/imagem da CONTRATADA sem sua prévia autorização por escrito, no que tange a propaganda, marketing e afins, tanto na mídia escrita, falada, virtual ou qualquer outro meio de divulgação.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>21. Uso de Imagem da CONTRATANTE</h5>
+                    <p>A CONTRATANTE autoriza a veiculação do seu direito de imagem gratuitamente à CONTRATADA, podendo esta exibi-la nos seus meios de comunicação interna e externa, como sites, redes sociais, eventos, matérias de propaganda e afins.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>22. Endereço Comercial</h5>
+                    <p>Fica autorizada ao CONTRATANTE a utilização do endereço da CONTRATADA como seu endereço comercial de divulgação (cartões de visita, sites, redes sociais e material gráfico).</p>
+                </div>
+
+                <div class="clause">
+                    <h5>23. Restrição de Endereço Fiscal</h5>
+                    <p>Fica vedada ao CONTRATANTE a utilização do endereço da CONTRATADA COMO SEU ENDEREÇO FISCAL (Domicílio tributário perante JUCESP, cartório, receita federal e secretaria da fazenda), em caso de contratos sem a opção "Endereço Fiscal".</p>
+                </div>
+
+                <div class="clause">
+                    <h5>24. Agendamento de Salas</h5>
+                    <p>O uso das salas de reunião deverá ser programado mediante agendamento prévio, de acordo com a disponibilidade da agenda.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>25. Sinalização</h5>
+                    <p>Não será permitido colocar placas de sinalização do CONTRATANTE dentro das dependências da CONTRATADA.</p>
+                </div>
+
+                <div class="clause">
+                    <h5>26. Título Executivo Extrajudicial</h5>
+                    <p>O presente instrumento é aceito pelas partes como título executivo extrajudicial, na forma do artigo 784, inciso III, do Código de Processo Civil.</p>
+                </div>
+
+                <div class="forum-selection alert alert-info mt-4">
+                    <strong>Foro:</strong> As partes elegem o foro da cidade de São José dos Campos/SP, com exclusão de qualquer outro, como competente para dirimir todas e quaisquer dúvidas oriundas do presente contrato.
+                </div>
+            </section>
+
+            <div class="form-group form-check mb-4">
+                <input type="checkbox" class="form-check-input" id="acceptTerms" required>
+                <label class="form-check-label" for="acceptTerms">
+                    <strong>Li e aceito todas as cláusulas contratuais acima <span class="text-danger">*</span></strong>
+                </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block">
+                Prosseguir com o Contrato
+            </button>
+        </form>
+            </div>
+        </div>
+
+        <!-- Signatures Page -->
+        <div class="page-content" id="signaturesPage">
+            <div class="page-header">
+                <h2><i class="fas fa-file-signature"></i> Gerenciar Assinaturas</h2>
+                <button class="btn btn-primary" onclick="showZapSignConfig()">
+                    <i class="fas fa-cog"></i> Configurar ZapSign
+                </button>
+            </div>
+            
+            <div class="content-card">
+                <h3>Contratos Pendentes de Assinatura</h3>
+                <div id="pendingSignaturesList" class="signatures-list">
+                    <p class="text-muted text-center">Nenhum contrato pendente de assinatura</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Page -->
+        <div class="page-content" id="paymentsPage">
+            <div class="page-header">
+                <h2><i class="fas fa-money-bill-wave"></i> Gerenciar Pagamentos</h2>
+                <button class="btn btn-primary" onclick="showAsaasConfig()">
+                    <i class="fas fa-cog"></i> Configurar Asaas
+                </button>
+            </div>
+            
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <div class="card-icon pending">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="paymentsPagePendingCount">0</h3>
+                        <p>Pendentes</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-icon signed">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="paymentsPageReceivedCount">0</h3>
+                        <p>Recebidos</p>
+                    </div>
+                </div>
+                
+                <div class="dashboard-card">
+                    <div class="card-icon danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="card-content">
+                        <h3 id="paymentsPageOverdueCount">0</h3>
+                        <p>Vencidos</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <h3>Lista de Cobranças</h3>
+                <div id="paymentsList" class="payments-list">
+                    <p class="text-muted text-center">Nenhuma cobrança cadastrada</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- History Page -->
+        <div class="page-content" id="historyPage">
+            <div class="page-header">
+                <h2><i class="fas fa-history"></i> Histórico de Contratos</h2>
+                <button class="btn btn-primary" onclick="exportHistory()">
+                    <i class="fas fa-download"></i> Exportar
+                </button>
+            </div>
+            
+            <div class="content-card">
+                <div id="contractHistoryList" class="history-list">
+                    <p class="text-muted text-center">Nenhum contrato no histórico</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div class="page-content" id="settingsPage">
+            <div class="page-header">
+                <h2><i class="fas fa-cog"></i> Configurações</h2>
+            </div>
+            
+            <div class="content-card">
+                <h3>Integrações</h3>
+                
+                <div class="settings-item">
+                    <div class="settings-info">
+                        <i class="fas fa-signature"></i>
+                        <div>
+                            <h4>ZapSign</h4>
+                            <p>Configurar integração com ZapSign para assinatura digital</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-primary" onclick="showZapSignConfig()">
+                        <i class="fas fa-cog"></i> Configurar
+                    </button>
+                </div>
+                
+                <div class="settings-item">
+                    <div class="settings-info">
+                        <i class="fas fa-dollar-sign"></i>
+                        <div>
+                            <h4>Asaas</h4>
+                            <p>Configurar integração com Asaas para pagamentos</p>
+                        </div>
+                    </div>
+                    <button class="btn btn-outline-primary" onclick="showAsaasConfig()">
+                        <i class="fas fa-cog"></i> Configurar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="content-card mt-4">
+                <h3>Dados da Empresa</h3>
+                
+                <div class="form-group">
+                    <label>Nome da Empresa</label>
+                    <input type="text" class="form-control" value="TECH TOWER COWORKING" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>CNPJ</label>
+                    <input type="text" class="form-control" value="52.606.303/0001-56" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label>Endereço</label>
+                    <textarea class="form-control" rows="2" readonly>AV. DR. NELSON D'ÁVILA, 389 – SALA 105A – CENTRO EMPRESARIAL TECH TOWER
+CENTRO - CEP 12245-641 – SÃO JOSÉ DOS CAMPOS/SP</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="zapsign-integration.js"></script>
+    <script src="asaas-integration.js"></script>
+    <script src="dashboard-data.js"></script>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+</body>
+</html>

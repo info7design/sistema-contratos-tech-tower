@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎯 Guia Visual - Onde Colocar o Token</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .box {
+            background: white;
+            padding: 30px;
+            margin: 20px 0;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .destaque {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .codigo {
+            background: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+            white-space: pre-wrap;
+            margin: 15px 0;
+        }
+        .passo {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            display: inline-block;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .screenshot {
+            border: 3px solid #007bff;
+            padding: 10px;
+            background: #e7f3ff;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        h1 { color: #333; text-align: center; }
+        h2 { color: #007bff; }
+        .botao-exemplo {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-amarelo {
+            background: #ffc107;
+            color: #333;
+        }
+        .btn-verde {
+            background: #28a745;
+            color: white;
+        }
+        .token-exemplo {
+            background: #fff;
+            border: 2px solid #28a745;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            word-break: break-all;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 GUIA VISUAL COMPLETO</h1>
+    <h2 style="text-align: center; color: #666;">Onde e Como Colocar o Token ZapSign</h2>
+
+    <!-- PASSO 1 -->
+    <div class="box">
+        <div class="passo">📍 PASSO 1: Abrir a Página Principal</div>
+        <p style="font-size: 18px; margin-top: 20px;">
+            <strong>Acesse:</strong> <a href="http://localhost:8000/index.html" target="_blank" style="color: #007bff; font-size: 20px;">
+                http://localhost:8000/index.html
+            </a>
+        </p>
+        <div class="destaque">
+            ⚡ <strong>IMPORTANTE:</strong> Use o servidor local (localhost:8000), não abra o arquivo direto!
+        </div>
+    </div>
+
+    <!-- PASSO 2 -->
+    <div class="box">
+        <div class="passo">👀 PASSO 2: Localizar os Botões</div>
+        <p style="font-size: 16px;">No <strong>TOPO da página</strong>, logo abaixo do cabeçalho "TECH TOWER COWORKING", você verá:</p>
+        
+        <div class="screenshot">
+            <div style="text-align: center; padding: 20px; background: white; border-radius: 5px;">
+                <p style="margin: 10px 0;"><strong>Número do Contrato:</strong> [Campo de texto]</p>
+                <p style="margin: 20px 0;">
+                    <span class="botao-exemplo btn-amarelo">⚙️ Configurar ZapSign</span>
+                    <span class="botao-exemplo btn-verde">📝 Assinaturas Pendentes</span>
+                </p>
+            </div>
+            <p style="text-align: center; margin-top: 15px; color: #dc3545; font-weight: bold;">
+                ☝️ PROCURE ESTES BOTÕES NO TOPO DA PÁGINA!
+            </p>
+        </div>
+    </div>
+
+    <!-- PASSO 3 -->
+    <div class="box">
+        <div class="passo">🖱️ PASSO 3: Clicar no Botão Amarelo</div>
+        <p style="font-size: 16px;">Clique no botão <strong>AMARELO</strong>:</p>
+        <div style="text-align: center; margin: 20px 0;">
+            <span class="botao-exemplo btn-amarelo" style="font-size: 20px; padding: 15px 30px;">
+                ⚙️ Configurar ZapSign ← CLIQUE AQUI!
+            </span>
+        </div>
+        <div class="destaque">
+            💡 Ao clicar, uma janela (modal) vai aparecer na tela
+        </div>
+    </div>
+
+    <!-- PASSO 4 -->
+    <div class="box">
+        <div class="passo">📋 PASSO 4: Cole o Token</div>
+        <p style="font-size: 16px;">Na janela que abrir, você verá um campo <strong>"Token da API:"</strong></p>
+        <p style="font-size: 16px;">Cole este token:</p>
+        <div class="token-exemplo">
+b99b2e0d-31ed-430a-a59b-452e8c5c072a568da138-ec9e-4134-a53a-c0b20f63acfc
+        </div>
+        <button onclick="copiarToken()" style="background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin-top: 10px;">
+            📋 Copiar Token
+        </button>
+    </div>
+
+    <!-- PASSO 5 -->
+    <div class="box">
+        <div class="passo">✅ PASSO 5: Testar e Salvar</div>
+        <ol style="font-size: 16px; line-height: 2;">
+            <li>Clique em <strong>"Testar Conexão"</strong> (botão azul)</li>
+            <li>Aguarde alguns segundos</li>
+            <li>Se aparecer "✅ Conexão bem-sucedida!", clique em <strong>"Salvar"</strong></li>
+        </ol>
+    </div>
+
+    <!-- CÓDIGO EXATO -->
+    <div class="box">
+        <h2>📄 Código Exato no index.html</h2>
+        <p>Se você quiser ver o código, está nas <strong>linhas 39-48</strong> do index.html:</p>
+        <div class="codigo"><!-- Botões ZapSign -->
+&lt;div class="mt-3"&gt;
+    &lt;button type="button" class="btn btn-sm btn-warning" onclick="showZapSignConfig()"&gt;
+        &lt;i class="fas fa-cog"&gt;&lt;/i&gt; Configurar ZapSign
+    &lt;/button&gt;
+    &lt;button type="button" class="btn btn-sm btn-success" onclick="showPendingSignatures()"&gt;
+        &lt;i class="fas fa-file-signature"&gt;&lt;/i&gt; Assinaturas Pendentes
+    &lt;/button&gt;
+&lt;/div&gt;</div>
+    </div>
+
+    <!-- TROUBLESHOOTING -->
+    <div class="box" style="background: #fff3cd;">
+        <h2 style="color: #856404;">🚨 SE NÃO FUNCIONAR:</h2>
+        
+        <h3 style="color: #856404;">Problema 1: Botão não aparece</h3>
+        <ul style="font-size: 16px;">
+            <li>✓ Certifique-se que está em <code>http://localhost:8000/index.html</code></li>
+            <li>✓ Aperte F5 para recarregar a página</li>
+            <li>✓ Veja se o servidor está rodando (terminal deve estar aberto)</li>
+        </ul>
+
+        <h3 style="color: #856404;">Problema 2: Modal não abre ao clicar</h3>
+        <ul style="font-size: 16px;">
+            <li>✓ Abra o Console (F12) e veja se há erros em vermelho</li>
+            <li>✓ Verifique se o arquivo <code>zapsign-integration.js</code> existe na pasta</li>
+            <li>✓ Recarregue a página (Ctrl + F5)</li>
+        </ul>
+
+        <h3 style="color: #856404;">Problema 3: Erro ao testar conexão</h3>
+        <ul style="font-size: 16px;">
+            <li>✓ Desabilite antivírus temporariamente</li>
+            <li>✓ Verifique sua conexão com internet</li>
+            <li>✓ Teste com o token fornecido acima</li>
+        </ul>
+    </div>
+
+    <!-- BOTÕES DE TESTE -->
+    <div class="box" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+        <h2 style="color: white;">🧪 Testes Rápidos</h2>
+        <div style="margin: 20px 0;">
+            <a href="http://localhost:8000/index.html" target="_blank" style="display: inline-block; background: white; color: #667eea; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 5px;">
+                📄 Abrir Index.html
+            </a>
+            <a href="http://localhost:8000/test-zapsign.html" target="_blank" style="display: inline-block; background: white; color: #667eea; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 5px;">
+                🧪 Página de Testes
+            </a>
+            <a href="http://localhost:8000/diagnostico.html" target="_blank" style="display: inline-block; background: white; color: #667eea; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 5px;">
+                🔍 Diagnóstico
+            </a>
+        </div>
+    </div>
+
+    <div class="box" style="text-align: center;">
+        <p style="font-size: 18px; color: #666;">
+            Ainda com dúvidas? Me envie um print da tela mostrando o que você está vendo!
+        </p>
+    </div>
+
+    <script>
+        function copiarToken() {
+            const token = 'b99b2e0d-31ed-430a-a59b-452e8c5c072a568da138-ec9e-4134-a53a-c0b20f63acfc';
+            navigator.clipboard.writeText(token).then(() => {
+                alert('✅ Token copiado! Agora cole no campo do modal.');
+            }).catch(() => {
+                prompt('Copie este token:', token);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste de Integração ZapSign</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 50px 0;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+        .test-result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="text-center mb-4">
+            <i class="fas fa-vial"></i> Teste de Integração ZapSign
+        </h1>
+
+        <!-- Configuração -->
+        <div class="test-section">
+            <h3>1. Configuração da API</h3>
+            <div class="form-group">
+                <label for="apiToken">Token da API:</label>
+                <input type="password" class="form-control" id="apiToken" placeholder="Cole seu token aqui">
+                <small class="form-text text-muted">
+                    Token de teste: <code>b99b2e0d-31ed-430a-a59b-452e8c5c072a568da138-ec9e-4134-a53a-c0b20f63acfc</code>
+                </small>
+            </div>
+            <button class="btn btn-primary" onclick="testSaveToken()">
+                <i class="fas fa-save"></i> Salvar Token
+            </button>
+            <button class="btn btn-info ml-2" onclick="testConnection()">
+                <i class="fas fa-plug"></i> Testar Conexão
+            </button>
+            <div id="configResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Listar Documentos -->
+        <div class="test-section">
+            <h3>2. Listar Documentos</h3>
+            <p class="text-muted">Lista todos os documentos criados na sua conta ZapSign</p>
+            <button class="btn btn-success" onclick="testListDocuments()">
+                <i class="fas fa-list"></i> Listar Documentos
+            </button>
+            <div id="listResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Criar Documento de Teste -->
+        <div class="test-section">
+            <h3>3. Criar Documento de Teste</h3>
+            <p class="text-muted">Cria um documento simples para testar a API</p>
+            <div class="form-group">
+                <label for="testDocName">Nome do Documento:</label>
+                <input type="text" class="form-control" id="testDocName" value="Contrato Teste - ZapSign">
+            </div>
+            <div class="form-group">
+                <label for="testSignerName">Nome do Signatário:</label>
+                <input type="text" class="form-control" id="testSignerName" placeholder="Seu Nome">
+            </div>
+            <div class="form-group">
+                <label for="testSignerEmail">Email do Signatário:</label>
+                <input type="email" class="form-control" id="testSignerEmail" placeholder="seu@email.com">
+            </div>
+            <button class="btn btn-primary" onclick="testCreateDocument()">
+                <i class="fas fa-file-alt"></i> Criar Documento de Teste
+            </button>
+            <div id="createResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Status do Sistema -->
+        <div class="test-section">
+            <h3>4. Status do Sistema</h3>
+            <button class="btn btn-info" onclick="checkSystemStatus()">
+                <i class="fas fa-check-circle"></i> Verificar Status
+            </button>
+            <div id="statusResult" class="test-result" style="display: none;"></div>
+        </div>
+
+        <!-- Botões de Utilidades -->
+        <div class="test-section">
+            <h3>Utilidades</h3>
+            <button class="btn btn-warning" onclick="showZapSignConfig()">
+                <i class="fas fa-cog"></i> Abrir Configuração
+            </button>
+            <button class="btn btn-success ml-2" onclick="showPendingSignatures()">
+                <i class="fas fa-file-signature"></i> Assinaturas Pendentes
+            </button>
+            <button class="btn btn-danger ml-2" onclick="clearAllData()">
+                <i class="fas fa-trash"></i> Limpar Dados Locais
+            </button>
+        </div>
+    </div>
+
+    <script src="zapsign-integration.js"></script>
+    <script>
+        function showResult(elementId, message, type) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.style.display = 'block';
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = message;
+        }
+
+        function testSaveToken() {
+            const token = document.getElementById('apiToken').value.trim();
+            if (!token) {
+                showResult('configResult', '❌ Por favor, insira o token.', 'error');
+                return;
+            }
+            ZapSignAPI.setApiToken(token);
+            showResult('configResult', '✅ Token salvo com sucesso!', 'success');
+        }
+
+        async function testConnection() {
+            const token = ZapSignAPI.getApiToken();
+            if (!token) {
+                showResult('configResult', '❌ Token não configurado. Configure primeiro.', 'error');
+                return;
+            }
+
+            showResult('configResult', '⏳ Testando conexão...', 'info');
+
+            try {
+                const result = await ZapSignAPI.listDocuments({ limit: 1 });
+                showResult('configResult', `✅ Conexão bem-sucedida!<br>Endpoint: ${ZapSignConfig.apiUrl}`, 'success');
+            } catch (error) {
+                showResult('configResult', `❌ Erro na conexão:<br>${error.message}`, 'error');
+            }
+        }
+
+        async function testListDocuments() {
+            showResult('listResult', '⏳ Carregando documentos...', 'info');
+
+            try {
+                const result = await ZapSignAPI.listDocuments({ limit: 10 });
+                
+                if (result.docs && result.docs.length > 0) {
+                    let html = `✅ ${result.docs.length} documento(s) encontrado(s):<br><br>`;
+                    html += '<ul style="text-align: left;">';
+                    result.docs.forEach(doc => {
+                        html += `<li><strong>${doc.name}</strong> - Status: ${doc.status} (ID: ${doc.token.substring(0, 10)}...)</li>`;
+                    });
+                    html += '</ul>';
+                    showResult('listResult', html, 'success');
+                } else {
+                    showResult('listResult', 'ℹ️ Nenhum documento encontrado na sua conta.', 'info');
+                }
+            } catch (error) {
+                showResult('listResult', `❌ Erro ao listar documentos:<br>${error.message}`, 'error');
+            }
+        }
+
+        async function testCreateDocument() {
+            const docName = document.getElementById('testDocName').value.trim();
+            const signerName = document.getElementById('testSignerName').value.trim();
+            const signerEmail = document.getElementById('testSignerEmail').value.trim();
+
+            if (!docName || !signerName || !signerEmail) {
+                showResult('createResult', '❌ Preencha todos os campos.', 'error');
+                return;
+            }
+
+            showResult('createResult', '⏳ Criando documento de teste...', 'info');
+
+            try {
+                // Criar um PDF simples de teste
+                const pdfContent = 'JVBERi0xLjMKJcTl8uXrp/Og0MTGCjQgMCBvYmoKPDwgL0xlbmd0aCA1IDAgUiAvRmlsdGVyIC9GbGF0ZURlY29kZSA+PgpzdHJlYW0KeAErVAhUKFQwNAIABfIBXgplbmRzdHJlYW0KZW5kb2JqCjUgMCBvYmoKMTYKZW5kb2JqCjIgMCBvYmoKPDwgL1R5cGUgL1BhZ2UgL1BhcmVudCAzIDAgUiAvUmVzb3VyY2VzIDYgMCBSIC9Db250ZW50cyA0IDAgUiAvTWVkaWFCb3ggWzAgMCA2MTIgNzkyXQo+PgplbmRvYmoKNiAwIG9iago8PCAvUHJvY1NldCBbIC9QREYgXSA+PgplbmRvYmoKMyAwIG9iago8PCAvVHlwZSAvUGFnZXMgL0tpZHMgWyAyIDAgUiBdIC9Db3VudCAxID4+CmVuZG9iago4IDAgb2JqCjw8IC9UeXBlIC9DYXRhbG9nIC9QYWdlcyAzIDAgUiA+PgplbmRvYmoKOSAwIG9iago8PCAvQ3JlYXRvciAoVGVzdGUpIC9Qcm9kdWNlciAoVGVzdGUpID4+CmVuZG9iagp4cmVmCjAgMTAKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDA5IDAwMDAwIG4gCjAwMDAwMDAwODcgMDAwMDAgbiAKMDAwMDAwMDIxMiAwMDAwMCBuIAowMDAwMDAwMDE1IDAwMDAwIG4gCjAwMDAwMDAwNjYgMDAwMDAgbiAKMDAwMDAwMDE4OSAwMDAwMCBuIAowMDAwMDAwMDAwIDAwMDAwIG4gCjAwMDAwMDAyNzEgMDAwMDAgbiAKMDAwMDAwMDMyMCAwMDAwMCBuIAp0cmFpbGVyCjw8IC9TaXplIDEwIC9Sb290IDggMCBSIC9JbmZvIDkgMCBSID4+CnN0YXJ0eHJlZgo0MDEKJSVFT0YK';
+                
+                // Converter base64 para blob
+                const byteCharacters = atob(pdfContent);
+                const byteNumbers = new Array(byteCharacters.length);
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                const byteArray = new Uint8Array(byteNumbers);
+                const pdfBlob = new Blob([byteArray], {type: 'application/pdf'});
+                const pdfFile = new File([pdfBlob], 'teste.pdf', {type: 'application/pdf'});
+
+                // Upload
+                showResult('createResult', '⏳ Fazendo upload do PDF...', 'info');
+                const uploadResult = await ZapSignAPI.uploadPDF(pdfFile);
+
+                // Criar documento
+                const documentData = {
+                    name: docName,
+                    url_pdf: uploadResult.url,
+                    sandbox: true
+                };
+
+                const document = await ZapSignAPI.createDocument(documentData);
+
+                // Adicionar signatário
+                showResult('createResult', '⏳ Adicionando signatário...', 'info');
+                const signers = [{
+                    name: signerName,
+                    email: signerEmail,
+                    auth_mode: 'email',
+                    sign_as: 'sign'
+                }];
+
+                await ZapSignAPI.addSigners(document.token, signers);
+
+                // Enviar
+                showResult('createResult', '⏳ Enviando para assinatura...', 'info');
+                await ZapSignAPI.sendDocument(document.token);
+
+                showResult('createResult', 
+                    `✅ Documento criado com sucesso!<br><br>
+                    <strong>Token:</strong> ${document.token}<br>
+                    <strong>Status:</strong> ${document.status}<br><br>
+                    O email foi enviado para <strong>${signerEmail}</strong>`,
+                    'success'
+                );
+            } catch (error) {
+                showResult('createResult', `❌ Erro ao criar documento:<br>${error.message}`, 'error');
+            }
+        }
+
+        function checkSystemStatus() {
+            const hasToken = !!ZapSignAPI.getApiToken();
+            const signatures = ContractSignatureManager.getAllSignatures();
+            const signatureCount = Object.keys(signatures).length;
+            const pending = ContractSignatureManager.getPendingSignatures().length;
+
+            const html = `
+                <strong>Status do Sistema:</strong><br><br>
+                ✅ Script ZapSign: Carregado<br>
+                ${hasToken ? '✅' : '❌'} Token da API: ${hasToken ? 'Configurado' : 'Não configurado'}<br>
+                📊 Contratos com assinatura: ${signatureCount}<br>
+                ⏳ Assinaturas pendentes: ${pending}<br>
+                🌐 API URL: ${ZapSignConfig.apiUrl}<br>
+                🧪 Modo Sandbox: ${ZapSignConfig.sandboxMode ? 'Sim' : 'Não'}
+            `;
+
+            showResult('statusResult', html, 'info');
+        }
+
+        function clearAllData() {
+            if (confirm('Tem certeza que deseja limpar todos os dados locais (token, contratos, assinaturas)?')) {
+                localStorage.clear();
+                showResult('statusResult', '✅ Todos os dados locais foram limpos.', 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            }
+        }
+
+        // Verificar status ao carregar
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = ZapSignAPI.getApiToken();
+            if (token) {
+                document.getElementById('apiToken').value = token;
+            }
+            checkSystemStatus();
+        });
+    </script>
+</body>
+</html>
